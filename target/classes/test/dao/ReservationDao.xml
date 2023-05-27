@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="test.dao.ReservationDao">
+	<insert id="addReservation" parameterType="res">
+		insert reservation(user_id, lab_id, start_time, end_time)
+		values(#{user_id}, #{lab_id}, #{start_time}, #{end_time})
+	</insert>
+	<resultMap type="Reservation" id="rsv">
+	  <result property="start_time" column="start" />
+	  <result property="end_time" column="end"/>
+	  <association property="aUser" javaType="User">
+	    <result property="user_name" column="uname"/>
+	  </association>
+	  <association property="aLab" javaType="Lab">
+	    <result property="lab_id" column="lid"/>
+	    <result property="lab_name" column="lname"/>
+	    <result property="lab_place" column="place"/>
+	    <association property="aState" javaType="State">
+	      <result property="state_name" column="state"/>
+	    </association>
+	  </association>
+	</resultMap>
+	<select id="selectById" parameterType="user" resultMap="rsv">
+	  select lab.lab_id as lid, lab.lab_name as lname, lab.lab_place as place, user.user_name as uname, state.state_name as state,
+	    rsv.start_time as start, rsv.end_time as end
+	  from reservation as rsv, user, lab, state
+	  where rsv.user_id = #{user_id}
+	  and rsv.lab_id = lab.lab_id
+	  and rsv.user_id = user.user_id
+	  and rsv.state_id = state.state_id
+	</select>
+	<delete id="deleteReservation" parameterType="res">
+	  delete from reservation
+	  where user_id = #{user_id}
+	  and lab_id = #{lab_id}
+	</delete>
+	<resultMap type="Reservation" id="allRsv">
+		<id property="rsv_id" column="rid"/>
+		<result property="start_time" column="start" />
+		<result property="end_time" column="end" />
+		<association property="aUser" javaType="User">
+		  <id property="user_id" column="uid"/>
+		  <result property="user_name" column="uname"/>
+		</association>
+		<association property="aLab" javaType="Lab">
+		  <id property="lab_id" column="lid"/>
+		  <result property="lab_name" column="lname"/>
+		  <result property="lab_place" column="place"/>
+		  <association property="aState" javaType="State">
+		    <result property="state_name" column="sname"/>
+		  </association>
+		</association>
+	</resultMap>
+	<select id="selectAll" resultMap="allRsv">
+	  select rsv.rsv_id as rid, lab.lab_name as lname, lab.lab_place as place, state.state_name as sname, user.user_name as uname, 
+	    rsv.start_time as start, rsv.end_time as end, user.user_id as uid, lab.lab_id as lid
+	  from reservation as rsv, lab, user, state
+	  where rsv.user_id = user.user_id
+	  and rsv.lab_id = lab.lab_id
+	  and lab.state_id = state.state_id
+	  and lab.state_id = '1'
+	</select>
+	<update id="updateState" parameterType="Reservation">
+	  update reservation
+	  set state_id = #{aState.state_id}
+	  where user_id = #{aUser.user_id}
+	  and lab_id = #{aLab.lab_id}
+	</update>
+	<select id="selectByDoubleId" parameterType="Res" resultType="reservation">
+	  select *
+	  from reservation
+	  where user_id = #{user_id}
+	  and lab_id = #{lab_id}
+	</select>
+	<update id="updateStateByRsvid" parameterType="Reservation">
+	  update reservation
+	  set state_id = #{aState.state_id}
+	  where rsv_id = #{rsv_id}
+	</update>
+</mapper>

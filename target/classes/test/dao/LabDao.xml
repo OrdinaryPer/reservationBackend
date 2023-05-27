@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="test.dao.LabDao">
+	<resultMap type="Lab" id="labmap">
+		<id property="lab_id" column="lid" />
+		<result property="lab_name" column="lname" />
+		<result property="lab_detail" column="detail" />
+		<result property="lab_place" column="place" />
+		<association property="aState" javaType="State">
+			<result property="state_name" column="state" />
+		</association>
+	</resultMap>
+	<select id="selectAll" resultMap="labmap">
+		select lab.lab_id as lid, lab.lab_name as lname, lab.lab_detail as detail,
+		lab.lab_place as place, state.state_name as state
+		from lab, state
+		where lab.state_id = state.state_id
+	</select>
+	<select id="selectByState" resultMap="labmap" parameterType="state">
+		select lab.lab_id as lid, lab.lab_name as lname, lab.lab_detail as detail,
+		lab.lab_place as place, state.state_name as state
+		from lab, state
+		where lab.state_id = state.state_id
+		and lab.state_id = #{state_id}
+	</select>
+	<select id="selectByName" resultMap="labmap" parameterType="lab">
+		select lab.lab_id as lid, lab.lab_name as lname, lab.lab_detail as detail,
+		lab.lab_place as place, state.state_name as state
+		from lab, state
+		where lab.state_id = state.state_id
+		and lab.lab_name like concat('%' #{lab_name} '%')
+	</select>
+	<update id="updateState">
+	  update lab
+	  set state_id = #{aState.state_id}
+	  where lab_id = #{lab_id} 
+	</update>
+	<resultMap type="Lab" id="labmap2">
+		<id property="lab_id" column="lab_id"/>
+		<result property="lab_name" column="lab_name"/>
+		<result property="lab_place" column="lab_place"/>
+		<result property="lab_detail" column="lab_detail"/>
+		<association property="aState" javaType="State">
+			<result property="state_name" column="sname"/>
+		</association>
+	</resultMap>
+	<select id="selectById" resultMap="labmap2">
+		select lab_id, lab_name, lab_place, lab_detail, state.state_name as sname
+		from lab, state
+		where lab_id = #{lab_id}
+		and lab.state_id = state.state_id
+	</select>
+	<update id="updateById" parameterType="lab">
+		update lab
+		set lab_name = #{lab_name},
+			lab_place = #{lab_place},
+			lab_detail = #{lab_detail}
+		where lab_id = #{lab_id}
+	</update>
+	<delete id="deleteById" parameterType="lab">
+		delete from lab
+		where lab_id = #{lab_id}
+	</delete>
+	<insert id="addLab" parameterType="lab">
+		insert into lab(lab_name, lab_detail, lab_place, state_id)
+		values(#{lab_name}, #{lab_detail}, #{lab_place}, '0')
+	</insert>
+	<select id="selectPlace" resultType="lab">
+		select lab_place
+		from lab
+	</select>
+</mapper>
